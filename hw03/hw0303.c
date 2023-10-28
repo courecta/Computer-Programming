@@ -12,26 +12,7 @@ int main(){
 
     printf("Please enter the number: ");
     scanf("%d", &number);
-    printf("binary = %d, two's compliment = %d, and count is %d\n", BinaryForm(number), Counter(count));
-
-    if (number > 0){
-        for (int32_t i = 0 ; i < Counter(count) ; i++){
-            if (i % 8 == 0){
-                printf(" ");
-                continue;
-            }
-            printf("0");
-        }
-    }
-    else if (number < 0){
-        for (int32_t i = 0 ; i < Counter(count) ; i++){
-            if (i % 8 == 0){
-                printf(" ");
-                continue;
-            }
-            printf("1");
-        }
-    }
+    printf("%d\n", BinaryForm(number));
 
     return 0;
 }
