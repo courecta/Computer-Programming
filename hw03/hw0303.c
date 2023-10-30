@@ -1,46 +1,40 @@
 #include <stdio.h>
 #include <stdint.h>
-#include <math.h>
+
+/*Steps on how to convert binary to 2's compliment
+
+1. Invert the 0's and 1's
+2. add a 1 at the end
+
+*/
 
 int32_t number;
 
+void initialize();
 int32_t BinaryForm (int32_t number);
 int32_t twosCompliment (int32_t number);
-int32_t Counter (int32_t count);
+int32_t printer (int32_t count);
 
 int main(){
 
-    printf("Please enter the number: ");
-    scanf("%d", &number);
-    printf("%d\n", BinaryForm(number));
+    message();
 
     return 0;
 }
 
-int32_t BinaryForm (int32_t number){
-    int32_t binaryNumber = 0;
-    for (int32_t i = 0; number != 0; i++){
-        int32_t remainderCount = number % 2;
-        int32_t powerTo32 = pow(10, i);
-        
-        binaryNumber = binaryNumber + (remainderCount * powerTo32);
-        number /= 2;
-    }
-    return binaryNumber;
+void message(){
+    printf("Please enter the number: ");
+    scanf("%d", &number);
+    BinaryForm();
+}
 
+int32_t BinaryForm (int32_t number){
+
+    int32_t binaryNumber = number % 2    
+
+    return binaryNumber;   
 }
 
 int32_t twosCompliment (int32_t number){
-    BinaryForm(binaryNumber);
-
-}
-
-int32_t Counter (int32_t count){
-    if (number > 0){
-    BinaryForm (binaryNumber);
-    }
-    else if (number < 0){
-        
-    }
 
 }
