@@ -1,9 +1,2 @@
-#include <stdio.h>
-#include <stdint.h>
+#include "mycircle.h"
 
-int main(){
-
-    
-
-    return 0;
-}
