@@ -5,7 +5,7 @@ all:
 
 	gcc hw0302.c -c -o hw0302.o
 	gcc mycontrol.c -c -o mycontrol.o
-	gcc hw0302.o mycontrol.o -o hw0302
+	gcc hw0302.o mycontrol.o -o hw0302 -lm
 
 	gcc hw0303.c -o hw0303
 	
@@ -16,7 +16,13 @@ all:
 
 clean:
 	rm -rf hw0301
+
 	rm -rf hw0302
+	rm -rf mycontrol.o
+	rm -rf hw0302.o
+
 	rm -rf hw0303
+	
 	rm -rf hw0304
+	
 	rm -rf hw0305

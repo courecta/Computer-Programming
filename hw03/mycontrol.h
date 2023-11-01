@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdint.h>
 
-
 void initialize( double x, double y, double a);
 int32_t forward( double length );
 int32_t clock_turn( double x );

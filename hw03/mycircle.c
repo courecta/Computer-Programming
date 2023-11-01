@@ -1,7 +1,5 @@
 #include "mycircle.h"
 
-int32_t r;
-
 /*
 
 int32_t set_radius( double r);
