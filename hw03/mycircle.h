@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdint.h>
 
-
 int32_t set_radius( double r);
 double get_circle_circumference();
 double get_circle_area();
