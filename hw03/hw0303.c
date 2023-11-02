@@ -13,7 +13,11 @@ int main(){
     printf("Please enter the number: ");
     scanf("%d", &number);
     int32_t n = number;
-    BinaryForm(number);
+    printf("%u\n", number);
+    if (n > 2147483648){
+        n = n - 2147483648;
+    }
+    BinaryForm(number, n);
     if (n > 0){
         printf("\r");
         positive();
@@ -27,7 +31,7 @@ void BinaryForm(uint32_t number){
         printf("00000000 00000000 00000000 00000000");
         return;
     }
-    else if (n >= 2147483648){
+    else if (number >= 2147483648 || number < -2147483648){
         printf("Error! Please enter a valid 32-bit signed integer");
         return;
     }
