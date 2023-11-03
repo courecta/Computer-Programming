@@ -9,7 +9,10 @@ all:
 
 	gcc hw0303.c -o hw0303
 	
-	#gcc hw0304.c -o hw0304
+	gcc hw0304-1.c -c -o hw0304-1.o
+	gcc hw0304-2.c -c -o hw0304-2.o
+	gcc hw0304.c hw0304-1.o -o hw0304-1
+	gcc hw0304.c hw0304-2.o -o hw0304-2
 	
 	#gcc hw0305.c -o hw0305
 	
@@ -25,6 +28,9 @@ clean:
 
 	rm -rf hw0303
 	
-	rm -rf hw0304
+	rm -rf hw0304-1.o
+	rm -rf hw0304-2.o
+	rm -rf hw0304-1
+	rm -rf hw0304-2
 	
 	rm -rf hw0305
