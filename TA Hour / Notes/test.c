@@ -1,19 +1,20 @@
 #include <stdio.h>
 
-void towerOfHanoi(int num_disks, int from_rod, int to_rod, int aux_rod) {
-    if (num_disks == 1) {
-        printf("Move disk %d to rod %d\n", num_disks, to_rod);
-        return;
+//Back-end complete function Template for C
+
+// Function to find moves 
+void toh(int N, int rodOne, int rodThree, int rodTwo) {
+    if (N >= 1) {
+        toh(N - 1, rodOne, rodTwo, rodThree);
+        printf("Move disk %d to rod %d\n", N, rodThree);
+        toh(N - 1, rodTwo, rodThree, rodOne);
     }
-    towerOfHanoi(num_disks - 1, from_rod, aux_rod, to_rod);
-    printf("Move disk %d to rod %d\n", num_disks, to_rod);
-    towerOfHanoi(num_disks - 1, aux_rod, to_rod, from_rod);
+    return;
 }
 
-int main() {
-    int num_disks;
-    printf("Enter the disk number (2-20): ");
-    scanf("%d", &num_disks);
-    towerOfHanoi(num_disks, 1, 3, 2); // Assuming 3 rods (1, 2, 3)
+int main(){
+    
+    toh(2, 1, 2, 3);
+
     return 0;
 }

@@ -2,7 +2,8 @@
 
 int main(){
 
-    int16_t n = 0; // n is the number of disks
+    int32_t n = 0; // n is the number of disks
+    int32_t rodOne = 1, rodTwo = 2, rodThree = 3; // initializes the three rods as integers
     printf("Please enter the disk number (2-20): ");
     scanf("%d", &n);
     if (n < 2 || n > 20){
@@ -10,7 +11,7 @@ int main(){
         return 1;
     }
     
-    towerOfHanoi (int32_t n);
+    towerOfHanoi ( n, rodOne, rodThree, rodTwo);
 
     return 0;
 }

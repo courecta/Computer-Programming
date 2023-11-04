@@ -1,7 +1,9 @@
 #include "hw0304.h"
 
-void towerOfHanoi (int32_t n){
+void towerOfHanoi (int n, int rodOne, int rodThree, int rodTwo){
     
 
-    
+
+
+    return 0;
 }
