@@ -57,12 +57,9 @@ double get_tangent_area(double x){
     }
         
     double b = y - (m * x);
-
     double xint = b;
     double yint = -(b)/m;
-
     double area_tangent = (xint * yint)/2;
-
     return area_tangent;
 
 }
@@ -90,5 +87,4 @@ double get_outer_regular_polygon_area( int32_t n ){
     
     double outer_area = (n / 2) * (2 * radius * sin(M_PI / n)) * (radius * cos(M_PI / n));
     return outer_area;
-
 }

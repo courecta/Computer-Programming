@@ -10,11 +10,13 @@ all:
 	gcc hw0303.c -o hw0303
 	
 	gcc hw0304-1.c -c -o hw0304-1.o
+	gcc hw0304.c hw0304-1.o -o hw0304-1 -lm
 	gcc hw0304-2.c -c -o hw0304-2.o
-	gcc hw0304.c hw0304-1.o -o hw0304-1
-	gcc hw0304.c hw0304-2.o -o hw0304-2
+	gcc hw0304.c hw0304-2.o -o hw0304-2 -lm
 	
-	#gcc hw0305.c -o hw0305
+	gcc diceRolls.c -c -o diceRolls.o
+	gcc hw0305.c -c -o hw0305.o
+	gcc diceRolls.o hw0305.o -o hw0305 -lm
 	
 
 clean:
@@ -33,4 +35,6 @@ clean:
 	rm -rf hw0304-1
 	rm -rf hw0304-2
 	
+	rm -rf diceRolls.o
+	rm -rf hw0305.o
 	rm -rf hw0305
