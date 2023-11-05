@@ -16,7 +16,7 @@ all:
 	
 	gcc diceRolls.c -c -o diceRolls.o
 	gcc hw0305.c -c -o hw0305.o
-	gcc diceRolls.o hw0305.o -o hw0305 -lm
+	gcc diceRolls.o hw0305.o -o hw0305
 	
 
 clean:
