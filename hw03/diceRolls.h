@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 
 #define n "\e[0;105m%d\e[0m"
 

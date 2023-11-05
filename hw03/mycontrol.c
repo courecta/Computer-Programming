@@ -6,6 +6,9 @@ double xCurrent, yCurrent, aCurrent;
 
 void initialize( double x, double y, double a){
     initial += 1;
+    if (abs(x) < 0.000001) {
+    x = 0;
+    }
     xCurrent = x;
     yCurrent = y;
     aCurrent = a;

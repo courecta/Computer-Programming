@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 void initialize( double x, double y, double a);
 int32_t forward( double length );
