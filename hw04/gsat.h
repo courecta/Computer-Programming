@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdint.h>
 #define STUDENT_NUMBER (100) // Of course , the number may not be 100.
 #define CHINESE (0)
