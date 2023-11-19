@@ -8,6 +8,3 @@
 #include <time.h>
 #include <math.h>
 
-//#define ARRAY_SIZE 20
-
-//void func();
