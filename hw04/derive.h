@@ -6,6 +6,6 @@
 #include <math.h>
 
 void equation();
-void displayEq();
+void displayEq(int32_t fCoefficients[], int32_t gCoefficients[]);
 void product();
 void quotient();
