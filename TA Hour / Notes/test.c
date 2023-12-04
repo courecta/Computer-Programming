@@ -1,8 +1,11 @@
 #include "test.h"
 
-int main (){
+int main () {
+   double val = (double) 161567 * 88 / 100;
 
-    
+   int32_t value = ceil(val);
 
-    return 0;
+   printf("value = %d\n", value);
+
+   return(0);
 }
