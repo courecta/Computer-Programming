@@ -1,5 +1,8 @@
-int32_t board[10][9] = {{
-{15, 0, 0,}
+#include "mychess.h"
 
+int main(){
 
-}}
+    checkmate();
+
+    return 0;
+}

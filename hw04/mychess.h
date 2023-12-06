@@ -1,6 +1,10 @@
 #pragma once
 
+#pragma once
+
+#include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #define EMPTY (0)
 #define RED_GENERAL (1)

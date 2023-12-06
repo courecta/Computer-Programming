@@ -1,7 +1,5 @@
 #include "derive.h"
 uint8_t  fDegree, gDegree;
-//int32_t degree;
-//int32_t coefficients[degree];
 
 void error(){
     printf("Error!\n");
