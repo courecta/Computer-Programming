@@ -3,6 +3,11 @@ uint8_t  fDegree, gDegree;
 //int32_t degree;
 //int32_t coefficients[degree];
 
+void error(){
+    printf("Error!\n");
+    exit(1);
+}
+
 void equation(){
 
     printf("Please enter f(x) degree: ");
@@ -122,11 +127,6 @@ printf("(f(x)g(x))': ");
 
 void quotient(int32_t fCoefficients[], int32_t gCoefficients[]){
 
-}
-
-void error(){
-    printf("Error!\n");
-    exit(1);
 }
 
 void derive(int32_t degree, int32_t coefficients[]){
