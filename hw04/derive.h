@@ -5,11 +5,21 @@
 #include <stdlib.h>
 #include <math.h>
 
+// functions to handle displaying the initial equations
 void equation();
-void displayEq(int32_t fCoefficients[], int32_t gCoefficients[]);
-void displayf(int32_t fCoefficients[]);
-void displayg(int32_t gCoefficients[]);
-void product(int32_t fCoefficients[], int32_t gCoefficients[]);
-void quotient(int32_t fCoefficients[], int32_t gCoefficients[]);
-void error();
-void derive(int32_t degree, int32_t coefficients[]);
+void displayEq(int64_t fCoefficients[], int64_t gCoefficients[]);
+
+// functions to handle displaying the product rules and quotient rules
+void product(int64_t fCoefficients[], int64_t gCoefficients[], size_t quotientOn);
+void quotient(int64_t fCoefficients[], int64_t gCoefficients[]);
+
+// functions to handle errors and processes
+void error(int16_t exitCode);
+void derive(int32_t degree, int64_t coefficients[], int8_t mode);
+void square(int64_t gCoefficients[]);
+
+// function to print equations
+void display(int32_t degree[], int64_t fCoefficients[]);
+
+// function to free memory allocated
+void freed();

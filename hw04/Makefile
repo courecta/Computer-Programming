@@ -5,7 +5,7 @@ all:
 
 	gcc hw0402.c -c -o hw0402.o
 	gcc derive.c -c -o derive.o
-	gcc hw0402.o derive.o -o hw0402 -lm
+	gcc hw0402.o derive.o -o hw0402 -lm -g
 
 	gcc hw0403.c -o hw0403 -lm
 

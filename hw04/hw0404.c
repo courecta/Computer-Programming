@@ -2,7 +2,10 @@
 
 int main(){
 
-    checkmate();
+    int32_t board[10][9] = {{}
+                                    }
+
+    checkmate( board[10][9]);
 
     return 0;
 }
