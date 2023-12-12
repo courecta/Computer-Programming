@@ -219,10 +219,10 @@ for (size_t i = 0 ; i < gDegree ; ++i){
 int32_t m = 0;
 k = 0;
 
-derive(fDegree,fCoefficients, 1);
+derive(fDegree, fCoefficients, 1);
 derive(gDegree, gCoefficients, 2);
 
-for (size_t i = 0 ; i < fDegree - 1 ; ++i){
+for (size_t i = 0 ; i < fDegree ; ++i){
     if (derivedF[i] != 0){
         for (size_t j = 0 ; j < gDegree ; ++j){
             if (gCoefficients[j] != 0 && degreeStoredG[j] >= 0){
@@ -237,7 +237,7 @@ for (size_t i = 0 ; i < fDegree - 1 ; ++i){
 
 k = 0;
 
-for (size_t i = 0 ; i < gDegree - 1 ; ++i){
+for (size_t i = 0 ; i < gDegree ; ++i){
     if (derivedG[i] != 0){
         for (size_t j = 0 ; j < fDegree ; ++j){
             if (fCoefficients[j] != 0 && degreeStoredF[j] >= 0){
@@ -353,9 +353,19 @@ for (size_t i = 0 ; i < topArray ; ++i){
 
 square(gCoefficients);
 
+int32_t bottomDegrees[bottomArray];
+int64_t bottomValue[bottomArray];
+
+for (size_t i = 0 ; i < bottomArray ; ++i){
+    bottomDegrees[i] = bottomDegree[i];
+    bottomValue[i] = bottom[i];
+}
+
 printf(" f(x)   ");
 display(topDegrees, topValue);
 printf("(----)': \n");
+printf(" g(x)   ");
+display(bottomDegrees, bottomValue);
 
 free(top);
 free(topDegree);
@@ -417,9 +427,10 @@ for (size_t i = 0 ; i < gSquared ; ++i){
     }
 }
 
-int32_t bottomFinalDegree = (productDegrees[0]) + 1;
+int32_t bottomFinalDegree = (bottomDegree[0]) + 1;
 int32_t bottomTrue = gSquared - negatives; 
 int32_t zeroCount = 0;
+bottomArray = bottomFinalDegree;
 
 for (size_t i = 0 ; i < bottomFinalDegree ; ++i){
     if (bottom[i] == 0){
@@ -428,7 +439,6 @@ for (size_t i = 0 ; i < bottomFinalDegree ; ++i){
 }
 
 if (zeroCount == bottomFinalDegree){
-    freed();
     error(3);
 } else {
     
