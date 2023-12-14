@@ -1,7 +1,7 @@
 all:
 	gcc hw0501.c -c -o hw0501.o
 	gcc mystatistics.c -c -o mystatistics.o
-	gcc hw0501.o mystatistics.o -o hw0501
+	gcc hw0501.o mystatistics.o -o hw0501 -lm
 
 	gcc hw0502.c -c -o hw0502.o
 	gcc myge.c -c -o myge.o
@@ -17,7 +17,8 @@ all:
 
 	gcc hw0505.c -c -o hw0505.o
 	gcc tas.c -c -o tas.o
-	gcc hw0505.o tas.o -o hw0505
+	gcc decode.c -c -o decode.o
+	gcc hw0505.o tas.o decode.o -o hw0505
 
 clean:
 	rm -rf hw0501.o
@@ -38,4 +39,5 @@ clean:
 
 	rm -rf hw0505.o
 	rm -rf tas.o
+	rm -rf decode.o
 	rm -rf hw0505

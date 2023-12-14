@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <math.h>
 
 // functions to handle displaying the initial equations

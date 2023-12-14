@@ -1,5 +1,7 @@
 #include "derive.h"
-int32_t  fDegree = 0, gDegree = 0, leftDegree = 0, rightDegree = 0, topArray = 0, bottomArray = 0;
+int32_t  fDegree = 0, gDegree = 0, leftDegree = 0, rightDegree = 0, topArray = 0, bottomArray = 0, topLen = 0, botLen = 0;
+
+bool freeProd = false;
 
 int32_t* derivedF;
 int32_t* derivedG;
@@ -50,7 +52,7 @@ void error(int16_t exitCode){
     break;
 
     case 3:
-    printf("Division by zero detected");
+    printf("Division by zero detected\n");
     break;
     
     default:
@@ -63,45 +65,51 @@ void error(int16_t exitCode){
 void display(int32_t degree[], int64_t Coefficients[]){
 
     for (size_t i = 0 ; i <= degree[0] ; i++){
+        if (degree[i] != -1){
+            
         if (i >= 1){
             if (Coefficients[i] == 0){
                 continue;
-            }
+                }
             else if (Coefficients[i] > 0){
                 printf("+ ");
-            }
+                }
             else {
                 printf("- ");
+                }
             }
-        }
-        if (Coefficients[i] == 1 && degree[i] != -1){
+        if (Coefficients[i] == 1){
             printf("x");
-        }
-        else if (Coefficients[i] == -1 && degree[i] != -1){
+            }
+        else if (Coefficients[i] == -1){
             printf("-x");
-        }
+            } 
         else if (degree[i] > 0 && Coefficients[i] > 0){
             printf("%ldx", Coefficients[i]);
-        }
+            }
         else if (degree[i] > 0 && Coefficients[i] < 0 && i == 0){
             printf("%ldx", Coefficients[i]);
-        }
+            }
         else if (degree[i] > 0 && Coefficients[i] < 0){
             printf("%dx", abs(Coefficients[i]));
-        }
+            }
         
         if(degree[i] == 0){
             printf("%d",abs(Coefficients[i]));
-        }
+            }
         else if (degree[i] == 1){
             printf(" ");
-        }
+            }
         else {
         printf("^%d ",degree[i]);
+            }
         }
     }
     printf("\n");
+    if (freeProd == 1){
     freed();
+    freeProd = false;
+    }
 }
 
 void equation(){
@@ -318,10 +326,10 @@ for (size_t i = 0 ; i < productFinalDegree ; ++i){
 }
 
 if (zeroCount == productFinalDegree){
-    printf("0");
+    printf("0\n");
     freed();
     } 
-    else if (quotientOn == 1){
+else if (quotientOn == 1){
     
     top = (int32_t*)malloc(productFinalDegree * sizeof(int32_t));
     topDegree = (int32_t*)malloc(productFinalDegree * sizeof(int32_t));
@@ -333,6 +341,7 @@ if (zeroCount == productFinalDegree){
         }
     }
     else {
+        freeProd = true;
         display(productDegrees, products);
     }
 
@@ -349,8 +358,17 @@ int64_t topValue[topArray];
 for (size_t i = 0 ; i < topArray ; ++i){
     topDegrees[i] = topDegree[i];
     topValue[i] = top[i];
+    topLen += (int64_t) log10(labs(top[i]));
+    if (topDegree[i] == 1){
+        topLen += 1;
+    }
 }
 
+if (topValue[0] < 0){
+        topLen += 1;
+    }
+
+topLen += 6 * (topArray - 1);
 square(gCoefficients);
 
 int32_t bottomDegrees[bottomArray];
@@ -361,10 +379,19 @@ for (size_t i = 0 ; i < bottomArray ; ++i){
     bottomValue[i] = bottom[i];
 }
 
-printf(" f(x)   ");
+printf(" f(x)    ");
 display(topDegrees, topValue);
-printf("(----)': \n");
-printf(" g(x)   ");
+printf("(----)': ");
+
+int32_t length = 0;
+length = (topLen >= botLen) ? topLen : botLen;
+
+for (size_t i = 0 ; i < length ; ++i){
+    printf("-");
+}
+printf("\n");
+
+printf(" g(x)    ");
 display(bottomDegrees, bottomValue);
 
 free(top);
