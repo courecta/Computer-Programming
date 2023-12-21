@@ -16,3 +16,7 @@ Return 2 if there are more than one solutions.
 */
 
 int32_t gaussian_elimination( int32_t n, int32_t *pA, int32_t *py, int32_t **px );
+
+int64_t gcd(int64_t a, int64_t b);
+
+int64_t lcm(int64_t a, int64_t b);

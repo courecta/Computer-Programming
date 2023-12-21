@@ -1,34 +1,56 @@
+#include <stdio.h>
+#include <stdint.h>
 #include "myge.h"
 
-int main() {
-    int32_t n = 3;
-
-    // Flatten the matrix into a single array
-    int32_t A[] = {
-        1, 1, 1,
-        1, 2, 4,
-        1, 3, 9
-    };
-    int32_t y[] = {6, 17, 34};
-    int32_t *x = NULL;
-    int32_t x_answer[] = {1, 2, 3};
-
-    int32_t result = gaussian_elimination(n, A, y, &x);
-
-    if (result == 1) {
-        printf("The solution is:\n");
-        for (int32_t i = 0; i < n; ++i) {
-            printf("x[%d] = %d\n", i, x[i]);
-        }
-        printf("example solution:\n");
-        for (int32_t i = 0; i < n; ++i) {
-            printf("x[%d] = %d\n", i, x_answer[i]);
-        }
-    } else {
-        printf("Wrong Answer. Result should be 1.\n");
-    }
-
-    if (x != NULL) free(x);
-
-    return 0;
+int main()
+{
+	int32_t size = 0;
+	int32_t nul = 0;
+	scanf("%d", &nul);
+	if (nul == 0)
+	{
+		scanf("%d", &size);
+		int32_t A[size][size];
+		int32_t y[size];
+		int32_t *x = NULL;
+		for (int32_t i = 0; i < size; i++)
+		{
+			for (int32_t j = 0; j < size; j++)
+			{
+				scanf("%d", &A[i][j]);
+			}
+		}
+		for (int32_t i = 0; i < size; i++)
+		{
+			scanf("%d", &y[i]);
+		}
+		int32_t return_value = gaussian_elimination(size, &A[0][0], &y[0], &x);
+		printf("return: %d\n", return_value);
+		printf("x = [");
+		if (return_value == 1)
+		{
+			for (int32_t i = 0; i < size; i++)
+			{	
+				printf("%d ", *(x+i));
+			}
+			printf("]^T\n");
+		}
+		free(x);
+	}
+	else if (nul == -1)
+	{
+		int32_t A[2][2] = {0};
+		int32_t y[2] = {0};
+		int32_t *x = NULL;
+		int32_t return_value = gaussian_elimination(0, &A[0][0], y, &x);
+		printf("return: %d\n", return_value);
+	}
+	else
+	{
+		int32_t *x = NULL;
+		int32_t return_value = gaussian_elimination(1, NULL, NULL, &x);
+		printf("return: %d\n", return_value);
+	}
+	
+	return 0;
 }

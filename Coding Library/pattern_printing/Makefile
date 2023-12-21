@@ -1,4 +1,4 @@
 all:
-	gcc simple_pattern.c -o a
+	gcc operationPress.c -o a
 clean:
 	rm -rf a
