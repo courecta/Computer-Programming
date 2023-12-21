@@ -9,7 +9,7 @@ all:
 
 	gcc hw0503.c -c -o hw0503.o
 	gcc mysphere.c -c -o mysphere.o
-	gcc hw0503.o mysphere.o -o hw0503
+	gcc hw0503.o mysphere.o -o hw0503 -lm
 
 	gcc hw0504.c -c -o hw0504.o
 	gcc mytlv.c -c -o mytlv.o
