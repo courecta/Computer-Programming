@@ -7,7 +7,9 @@ all:
 	gcc -g mine.c -c -o mine.o
 	gcc fin02.o mine.o -o fin02
 	
-	gcc fin04.c -o fin04
+	gcc fin04.c -c -o fin04.o
+	gcc game.c -c -o game.o
+	gcc fin04.o game.o -o fin04 -lm
 
 clean:
 	rm -rf fin01.o
@@ -19,3 +21,5 @@ clean:
 	rm -rf fin02
 	
 	rm -rf fin04.o
+	rm -rf game.o
+	rm -rf fin04
