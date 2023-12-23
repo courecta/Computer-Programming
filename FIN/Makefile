@@ -1,21 +1,21 @@
 all:
-	gcc fin01.c -o fin01
+	gcc fin01.c -c -o fin01.o
+	gcc frac.c -c -o frac.o
+	gcc fin01.o frac.o -o fin01 -lm
 
-	gcc fin02.c -o fin02
-	
-	gcc fin03.c -o fin03
+	gcc fin02.c -c -o fin02.o
+	gcc -g mine.c -c -o mine.o
+	gcc fin02.o mine.o -o fin02
 	
 	gcc fin04.c -o fin04
-	
-	gcc fin05.c -o fin05
 
 clean:
+	rm -rf fin01.o
+	rm -rf frac.o
 	rm -rf fin01
 	
+	rm -rf fin02.o
+	rm -rf mine.o
 	rm -rf fin02
 	
-	rm -rf fin03
-	
-	rm -rf fin04
-	
-	rm -rf fin05
+	rm -rf fin04.o
