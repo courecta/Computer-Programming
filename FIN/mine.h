@@ -24,7 +24,7 @@ hitting a position.
 // Return -1 if the input is invalid and return 1 is hit the mine; otherwise return 0.
 
 int32_t hit( int32_t board[16][30], int32_t row, int32_t col );
-//void printBoard(int32_t board[16][30]); <-- for testing purposes
+void printBoard(int32_t board[16][30]); //<-- for testing purposes
 
 /*
 Let’s give you an example. However, for my own good, I just give you a small size board

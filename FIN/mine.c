@@ -48,3 +48,18 @@ int32_t hit(int32_t board[16][30], int32_t row, int32_t col)
 
     return 0;
 }
+
+void printBoard(int32_t board[16][30]) {
+    for (int i = 0; i < 16; i++) {
+        for (int j = 0; j < 30; j++) {
+            if (board[i][j] == -1) {
+                printf(". ");
+            } else if (board[i][j] == -2) {
+                printf("* ");
+            } else {
+                printf("%d ", board[i][j]);
+            }
+        }
+        printf("\n");
+    }
+}

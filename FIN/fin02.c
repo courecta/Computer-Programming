@@ -34,7 +34,7 @@ int main(){
         printf("dead\n");
         exit(0);
         }
-    //printBoard(board);
+    printBoard(board);
     printf("result = %d\n", result);
     }
     return 0;
