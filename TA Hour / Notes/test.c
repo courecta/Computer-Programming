@@ -1,47 +1,27 @@
 #include "test.h"
-#define SIZE 10
-void Alice();
-void Bob();
 
-int main(){
+int main()
+{
+    char array[UCHAR_MAX] = {0};
+    char arrayRev[UCHAR_MAX] = {0};
+    int size = sizeof(array)/sizeof(array[0]);
+    fgets(array, UCHAR_MAX, stdin);
 
-    printf("Alice's code: \n");
-    Alice();
-    printf("\n");
-    printf("Bob's code: \n");
-    Bob();
-
-    return 0;
-}
-
-void Alice(){
-
-int16_t array[SIZE] = {0};
-
-    for(size_t i = 0; i < 5 ; i++){
-    scanf("%d", &array[i]);
+    int j = 0;
+    for (int i = size ; i >= 0 ; --i)
+    {
+    if (array[i] == 0)
+    {
+        continue;
+    }
+    else
+    {
+        arrayRev[j] = array[i];
+        ++j;
+    }
     }
 
-    for(size_t i = 5; i > 0; i--){
-    printf("%d and i at this index is %zu\n", array[i-1], i - 1);
-    }
-
-    printf("\n");
-
-}
-
-void Bob(){
-
-int16_t array[SIZE] = {0};
-
-    for(size_t i = 5; i > 0 ; i--){
-    scanf("%d", &array[i-1]);
-    }
-
-    for(size_t i = 0; i < 5; i++){
-    printf("%d and i at this index is %zu\n", array[i], i);
-    }
-
-printf("\n");
+    printf("Reversed: ");
+    puts(arrayRev);
 
 }

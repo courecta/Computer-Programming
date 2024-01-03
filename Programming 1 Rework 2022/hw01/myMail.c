@@ -9,7 +9,11 @@ void printLine(uint8_t input)
 
 uint8_t email_Check(char (*email)[])
 {
-
+    uint16_t i;
+    for( i = 0 ; i < UCHAR_MAX - 1 ; ++i)
+    {
+        if ((*email)[i] == 
+    }
 }
 
 uint8_t subject_Check( char (*subject)[] )
