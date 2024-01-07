@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <stdbool.h>
 #include <math.h>
 
 // Macro definitions //
@@ -16,6 +17,7 @@
 // email format error handles
 #define _LOCAL_INVALID_ 1
 #define _DOMAIN_INVALID_ 2
+#define _INVALID_EMAIL_FORMAT_ 3
 
 // subject error handles
 #define _CATEGORY_INVALID_ 1
@@ -24,12 +26,6 @@
 // email content error handles
 #define _CONTENT_OUT_OF_RANGE_ 1
 #define _CONTENT_TOO_LOW_ 2
-
-// external global variable definitions //
-
-// For the homework and problem number
-extern uint8_t A;
-extern uint8_t B;
 
 // Function prototypes //
 
@@ -43,3 +39,6 @@ void assignment( uint8_t email, uint8_t subject, uint8_t content );
 
 // function to print lines
 void printLine( uint8_t input );
+
+// function to get the size of the string literal
+uint16_t getSize(char (*array)[]);

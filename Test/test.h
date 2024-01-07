@@ -8,4 +8,5 @@
 #include <unistd.h>
 #include <time.h>
 #include <limits.h>
+#include <inttypes.h>
 #include <math.h>
