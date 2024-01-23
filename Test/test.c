@@ -10,8 +10,8 @@ int main(){
     double val = 1.0;
     for(uint16_t i = 1 ; i <= n ; i++)
     {
-        val = 1.0 + (1.0 / (1.0 + val));    
-        printf("n = %hu: %.15lf (%.15lf)\n", i, val, val - sqrt(2));
+        printf("n = %hu: %.15lf (%.15lf)\n", i, val, val - sqrt(2.0));
+        val = 1.0 + (1.0 / (1.0 + val));
     }
 
     return 0;
