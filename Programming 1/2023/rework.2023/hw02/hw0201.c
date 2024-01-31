@@ -4,24 +4,13 @@ int main(){
 
     uint16_t n = 0;
     double *sqrt_two;
-    double *pi_value;
-    printf("Please enter n (16-bits unsigned): ");
+    double *euler;
 
-    for(;;)
-    {
-        if(scanf("%u", n) == 1)
-        {
-            break;
-        }
-        else
-        {
-            printf("\nError, invalid input\n");
-            printf("Please enter n (16-bits unsigned): ");
-            continue;
-        }
-    }
+    n = getNum();
 
-    calculate_irr(n, sqrt_two, pi_value);
+    int32_t pass = calculate_irr(n, sqrt_two, pi_value, euler);
+
+    if(pass == 1) return 1;
 
     return 0;
 }
