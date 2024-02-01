@@ -29,15 +29,24 @@ int32_t calculate_two( const uint16_t n, double *ptrTwo )
     return EXIT_SUCCESS;
 }
 
-int32_t calculate_gregoryLeibniz( const uint16_t n )
+int32_t calculate_pi( const uint16_t n )
 {
-    
-}
-
-int32_t calculate_nilakantha( const uint16_t n )
-{
-    
-}
+    double val_gl = 4.0;
+    double valNil = 3.0;
+    double denominator = 3.0;
+    double denominatorNil = 2.0;
+    double sign = 1.0;
+    for(uint16_t i = 1 ; i <= n ; i++)
+    { 
+        printf("n = %hu:\n\tGregory-leibniz series: %.15lf (%.15lf)\n", i, val_gl, fabs(val_gl - PI));
+        printf("\tNilakantha series: %.15lf (%.15lf)\n", valNil, fabs(valNil - PI));
+        
+        val_gl = val_gl - (sign * ( 4 / denominator));
+        valNil = valNil + (sign * (4 / ((denominatorNil) * (denominatorNil + 1) * (denominatorNil + 2))));
+        denominator += 2;
+        denominatorNil += 2;
+        sign *= -1;
+    }
 
 int32_t calculate_euler( const uint16_t n, double *euler )
 {

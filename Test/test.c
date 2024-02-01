@@ -1,17 +1,13 @@
 #include "test.h"
 
-int main(){
-    
-    uint16_t n = 0;
-    //double sqrt2 = sqrt(2);
-    printf("Please enter n (16-bit unsigned): ");
-    scanf("%hu", &n);
+#define PI 3.14159265358979323846
 
-    double val = 1.0;
-    for(uint16_t i = 1 ; i <= n ; i++)
-    {
-        printf("n = %hu: %.15lf (%.15lf)\n", i, val, val - sqrt(2.0));
-        val = 1.0 + (1.0 / (1.0 + val));
+int main(){
+
+    uint16_t n = 0;
+    printf("Please enter n (16-bits unsigned): ");
+    scanf("%hu", &n);
+    double val = 
     }
 
     return 0;
