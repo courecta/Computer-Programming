@@ -16,8 +16,15 @@
 // function to get number of user
 uint16_t getNum();
 
+// function to get user action
+void await_input();
+void menu( const uint16_t n );
+
 // functions to calculate the irrational constants
-int32_t calculate_two( const uint16_t n, double *ptrTwo );
-int32_t calculate_pi( const uint16_t n );
-int32_t calculate_euler( const uint16_t n, double *euler );
+double calculate_two( const uint16_t n );
+void calculate_pi( const uint16_t n );
+double calculate_euler( const uint16_t n );
+
+// function to print lines
+void print_line();
 
