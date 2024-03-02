@@ -10,6 +10,8 @@
 #include <math.h>
 
 // function prototypes
-void multiply(const uint32_t firstNum, const uint32_t secondNum);
-void print_num(const uint32_t num);
-void print_line(const uint32_t num);
+bool check(const int64_t firstNum, const int64_t secondNum);
+void multiply(const int64_t firstNum, const int64_t secondNum);
+void print_num(const int64_t num, const int32_t length);
+int32_t count_line(const int64_t num);
+int32_t count_digit(const int64_t num);

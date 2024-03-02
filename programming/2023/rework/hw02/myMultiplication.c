@@ -1,30 +1,62 @@
 #include "myMultiplication.h"
 
-void multiply(const uint32_t firstNum, const uint32_t secondNum)
+bool check(const int64_t num)
 {
-  print_num(firstNum);
-  print_num(secondNum);
+  if(num < 0 || num > (pow(2,31) - 1)) return false;
 
-// TODO setup all data to be int64_t and test for boundaries
+  return true;
+}
+
+void multiply(const int64_t firstNum, const int64_t secondNum)
+{
+
+
 
   return;
 }
 
-void print_num(const uint32_t num)
+void print_num(const int64_t num, const int32_t length)
 {
-  uint32_t temp = num;
-  while(temp != )
+  int32_t n = num;
+  static uint8_t callTime;
+  callTime++;
 
-  return;
-}
+  int32_t digits = count_digit(num);
+  int32_t space = length - (digits * 2);
+  if(callTime == 2)
+  {
+    space -= 2;
+    printf("*)");
+  }
 
-void print_line(const uint32_t num)
-{
+  for( int32_t i = 0 ; i < space + 1 ; i++) printf(" ");
+
+  int32_t temp = digits - 1;
+  for( int32_t i = 0 ; i < digits ; i++)
+  {
+    if(num == 0)
+    {
+      printf("0");
+      break;
+    }
+
+    n /= pow(10,temp);
+    n %= 10;
+    printf("%d ", n);
+    temp -= 1;
+    n = num;
+  }
   printf("\n");
-  for(int32_t i = 0; i < (2 * num) + 1) ; i++) printf("-");
-  printf("\n");
   return;
 }
 
+int32_t count_line(const int64_t num)
+{
+  return ((2 * num) + 1);
+}
 
-
+int32_t count_digit(const int64_t num)
+{
+  if(num == 0) return 1;
+  return floor(log10(num) + 1);
+}

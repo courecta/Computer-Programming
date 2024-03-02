@@ -4,8 +4,8 @@ all:
 	gcc hw0201.o myIrrational.o -o hw0201 -lm
 
 	gcc hw0202.c -c -o hw0202.o
-	gcc myMultipication.c -c -o myMultipication.o
-	gcc hw0202.o myMultipication.o -o hw0202 -lm
+	gcc myMultiplication.c -c -o myMultiplication.o
+	gcc hw0202.o myMultiplication.o -o hw0202 -lm
 
 	gcc hw0203.c -c -o hw0203.o
 	gcc myNDFSM.c -c -o myNDFSM.o
@@ -25,7 +25,7 @@ clean:
 	rm -f hw0201
 
 	rm -f hw0202.o
-	rm -f myMultipication.o
+	rm -f myMultiplication.o
 	rm -f hw0202
 
 	rm -f hw0203.o
