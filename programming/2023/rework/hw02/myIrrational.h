@@ -18,7 +18,7 @@ uint16_t getNum();
 
 // function to get user action
 void await_input();
-void menu( const uint16_t n );
+void menu( uint16_t n );
 
 // functions to calculate the irrational constants
 double calculate_two( const uint16_t n );

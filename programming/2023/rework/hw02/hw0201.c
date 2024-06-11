@@ -2,7 +2,7 @@
 
 int main(){
 
-    uint16_t n = getNum();
+    uint16_t n = 0;
     
     menu(n);
     

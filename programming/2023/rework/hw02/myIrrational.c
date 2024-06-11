@@ -1,7 +1,16 @@
 #include "myIrrational.h"
 
-void menu( const uint16_t n )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winfinite-recursion"
+
+void menu( uint16_t n )
 {
+  while(n == 0)
+  {
+    n = getNum();
+    if(n != 0) break;
+  }
+
     int32_t operation = 0;
     static double two = 0, euler = 0;
     print_line();
@@ -39,7 +48,7 @@ void menu( const uint16_t n )
         break;
 
         case 5:
-        printf("exiting...\n");
+        printf("eiting...\n");
         exit(EXIT_SUCCESS);
         break;
 
@@ -48,9 +57,8 @@ void menu( const uint16_t n )
         break;
 
     }
-
     menu(n);
-
+  return;
 }
 
 uint16_t getNum()
@@ -58,10 +66,10 @@ uint16_t getNum()
     uint16_t num = 0;
     printf("Please enter n (16-bits unsigned): ");
     scanf("%hu", &num);
-    if( num > USHRT_MAX || num < 1 )
+    if( num < 1 )
     {
             printf("\nError, invalid input\n");
-            getNum();
+            return 0;
     } else return num;
 }
 
@@ -151,3 +159,5 @@ void await_input()
     }
     await_input();
 }
+
+#pragma GCC diagnostic pop
