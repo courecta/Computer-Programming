@@ -1,6 +1,9 @@
-#include "myCatan.h"
+#include <stdio.h>
+#include <stdint.h>
 
-int main(){
+int main()
+{
 
-    return 0;
+  
+  return 0;
 }

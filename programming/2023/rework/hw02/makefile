@@ -17,11 +17,11 @@ all: $(target)
 debug: CFLAGS += -DDEBUG -g
 debug: $(target)
 
-hw0301: hw0201.o myIrrational.o
-hw0302: hw0202.o
-hw0303: hw0203.o
-hw0304: hw0204.o
-hw0305: hw0205.o
+hw0201: hw0201.o
+hw0202: hw0202.o
+hw0203: hw0203.o
+hw0204: hw0204.o
+hw0205: hw0205.o
 
 -include $(DEP)
 
