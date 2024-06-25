@@ -5,7 +5,7 @@ DEP := $(SRC:.c=.d)
 OBJ := $(SRC:.c=.o)
 
 CC = -gcc
-CFLAGS = -Wall -Wextra -Werror -MMD -MP
+CFLAGS = -Wall -Wextra -Werror -MMD -MP -g
 
 LDFLAGS = -Wall -Wextra -Werror
 LDLIBS  = -lm
