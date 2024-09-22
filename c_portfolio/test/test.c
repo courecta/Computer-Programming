@@ -1,77 +1,30 @@
 #include <stdio.h>
-#include <math.h>
-#include <stdbool.h>
+#include <stdint.h>
 
-int main(){
-    
-    int l, w, h, n;
-    scanf("%d %d %d %d", &l, &w, &h, &n);
-    
-    int length = 2 * l;
-    int x_line = length + (w - 1);
-    int y_line = h + (w - 1);
+void catan(int64_t length, int64_t number_layer);
 
-    bool print = false;
+int main(){ 
+    int64_t length = 0, number_layer = 0;
 
-    int max_line = (n * (length + w - 2));
-    int temp_max = max_line;
+    printf("Please input the length: ");
+    scanf("%ld", &length);
+    printf("Please input the number of layer: ");
+    scanf("%ld", &number_layer);
 
-    int box_perLine = 81 / (length + w);
+    int64_t width_map;
 
-    for(int i = 0 ; i < y_line ; ++i)
+    if(length < 3 || number_layer < 1 || length > INT32_MAX || number_layer > INT32_MAX)
     {
-        for(int k = 0 ; k < n ; ++k)
-        {
-            for(int j = 0 ; j < x_line ; ++j)
-            {
-                print = false;
-                // printing the initial spaces
-                if(j < (w - 1 - i) && i < (w - 1))
-                {
-                    printf(" ");
-                    max_line--;
-                }
-
-                // printing '#' symbols
-
-                // diagonals
-                if((i == (w - j - 1)) || (i == (x_line - j - 1)) || ((i + (h - 1)) == (x_line - j - 1))) print = true;
-
-                //horizontals
-                if((i == 0 && j >= (w - 1)) || (j < length && (i == w - 1)) || (j < length && (i == ((h - 1) + (w - 1))))) print = true;
-
-                //verticals
-                if((i >= (w - 1) && j == 0) || (i >= (w - 1) && j == (length - 1)) || (i <= (w - 1) && j == ((w - 1)+ (length - 1)))) print = true;
-
-                // printing the colored faces
-
-
-                if(print)
-                {
-                    printf("#");
-                    max_line--;
-                }
-            }
-
-            // printing the after spaces
-
-            if(i >= (w - 1))
-            {
-            int space_bottom = i - (w - 2);  
-            while(space_bottom)
-            {
-                printf(" ");
-                max_line--;
-            }
-            printf(" ");
-            } else printf(" ");
-
-            if(temp_max - max_line >= 80)
-                {
-                    printf("\n");
-                    temp_max -= max_line;
-                }
-        }
+        printf("Error!\n");
+        return 1;
     }
-    return 0;
+
+    catan(length,number_layer);    
+}
+
+void catan(int64_t length, int64_t number_layer){
+        
+
+
+    return;
 }
