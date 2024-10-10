@@ -21,15 +21,3 @@ void hanoi(uint8_t n)
 
     return 0;
 }
-
-/*
-n = 154,321
-temp = n
-while(temp >= 10)
-{
-    temp /= 10;
-    digits++;
-}
-
-
-*/
