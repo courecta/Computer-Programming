@@ -1,7 +1,5 @@
 #include <stdio.h>
 
-// orthogonal matrix
-
 int main(){
 
     
