@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 
-// Ancient Cipher
 bool isAncientCipher(char *s1, char *s2);
 void sort(int arr[], int n);
 
@@ -19,8 +18,7 @@ int main(){
 bool isAncientCipher(char *s1, char *s2)
 {
     constexpr int ALPHABET_SIZE = 26;
-    int freqs1[ALPHABET_SIZE] = {0};
-    int freqs2[ALPHABET_SIZE] = {0};
+    int freqs1[ALPHABET_SIZE] = {0}, freqs2[ALPHABET_SIZE] = {0};
 
     for (int i = 0; s1[i] != '\0'; i++)
     {

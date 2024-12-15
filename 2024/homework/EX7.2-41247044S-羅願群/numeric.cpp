@@ -10,7 +10,9 @@ int sum(const int array[], const int size)
 
 double average(const int array[], const int size)
 {
-    return sum(array, size) / size;
+    double avg = 0.0;
+    avg = sum(array, size) / (double)size;
+    return avg;
 }
 
 void print(const int array[], const int size)
@@ -26,6 +28,7 @@ void reset(int array[], const int size)
 
 int max(const int array[], const int size)
 {
+    // return array[max_pos(array, size)];
     int max = array[0];
     for(int i = 1; i < size; i++) if(array[i] > max) max = array[i];
     return max;

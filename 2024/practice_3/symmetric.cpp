@@ -1,13 +1,10 @@
 #include <stdio.h>
 
-// symmetric Matrix
-
 int main(){
     long long matrix[100][100] = {0};
     int cases, symmetric, n;
     char c;
     scanf("%d", &cases);
-
     for(int k = 1; k <= cases; k++)
     {
         symmetric = 1;

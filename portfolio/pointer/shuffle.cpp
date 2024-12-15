@@ -4,6 +4,12 @@
 
 // Fisher-Yates / Knuth shuffle algorithm
 
+struct Card
+{
+    int value;
+    char suit;
+};
+
 void shuffle(int* deck, int size);
 void printDeck(int deck[], int size);
 void swap(int* a, int* b);
