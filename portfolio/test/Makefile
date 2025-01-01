@@ -1,5 +1,5 @@
 all:
-	g++ main.cpp -Wall -Wextra -Werror -g -lm -o main
+	gcc main.c -Wall -Wextra -Werror -g -lm -o main
 
 # -MMD -MP
 clean:
