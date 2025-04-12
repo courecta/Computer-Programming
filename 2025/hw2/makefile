@@ -6,8 +6,8 @@ all:
 	gcc hw0205.c -o hw0205 -lm || true
 
 clean:
-	rm hw0201
-	rm hw0202
-	rm hw0203
-	rm hw0204
-	rm hw0205
+	rm hw0201 || true
+	rm hw0202 || true
+	rm hw0203 || true
+	rm hw0204 || true
+	rm hw0205 || true
