@@ -64,7 +64,32 @@
 #define DW_FORM_sec_offset          0x17 // Offset in a section (e.g. .debug_line)
 #define DW_FORM_exprloc             0x18
 #define DW_FORM_flag_present        0x19
+#define DW_FORM_strx                0x1a // DWARF 5: string index
+#define DW_FORM_addrx               0x1b // DWARF 5: address index
+#define DW_FORM_ref_sup4            0x1c // DWARF 5: reference to supplementary
+#define DW_FORM_strp_sup            0x1d // DWARF 5: string pointer to supplementary
+#define DW_FORM_data16              0x1e // DWARF 5: 16-byte data
+#define DW_FORM_line_strp           0x1f // DWARF 5: offset in .debug_line_str
 #define DW_FORM_ref_sig8            0x20
+#define DW_FORM_implicit_const      0x21 // DWARF 5: value in abbrev
+#define DW_FORM_loclistx            0x22 // DWARF 5: location list index
+#define DW_FORM_rnglistx            0x23 // DWARF 5: range list index  
+#define DW_FORM_ref_sup8            0x24 // DWARF 5: 8-byte reference to supplementary
+#define DW_FORM_strx1               0x25 // DWARF 5: 1-byte string index
+#define DW_FORM_strx2               0x26 // DWARF 5: 2-byte string index
+#define DW_FORM_strx3               0x27 // DWARF 5: 3-byte string index
+#define DW_FORM_strx4               0x28 // DWARF 5: 4-byte string index
+#define DW_FORM_addrx1              0x29 // DWARF 5: 1-byte address index
+#define DW_FORM_addrx2              0x2a // DWARF 5: 2-byte address index
+#define DW_FORM_addrx3              0x2b // DWARF 5: 3-byte address index
+#define DW_FORM_addrx4              0x2c // DWARF 5: 4-byte address index
+
+// DWARF 5 Line Number Content Types (for directory and file entry formats)
+#define DW_LNCT_path                0x1
+#define DW_LNCT_directory_index     0x2
+#define DW_LNCT_timestamp           0x3
+#define DW_LNCT_size                0x4
+#define DW_LNCT_MD5                 0x5
 
 /* Helpers to read LEB128 values */
 static uint64_t read_uleb(const uint8_t **p) {
@@ -90,7 +115,11 @@ static int64_t read_sleb(const uint8_t **p) {
 }
 
 /* Abbrev structures */
-typedef struct AttrSpec { uint64_t name, form; struct AttrSpec *next; } AttrSpec;
+typedef struct AttrSpec { 
+    uint64_t name, form; 
+    int64_t implicit_const_value; // For DW_FORM_implicit_const
+    struct AttrSpec *next; 
+} AttrSpec;
 typedef struct Abbrev { uint64_t code; uint32_t tag; uint8_t has_children; AttrSpec *attrs; struct Abbrev *next; } Abbrev;
 
 // Context for the current Compilation Unit
@@ -111,6 +140,7 @@ typedef struct CUContext {
 
     const uint8_t *debug_info_base;
     const uint8_t *debug_str_base;
+    const uint8_t *debug_line_str_base; // DWARF 5 line strings
     const uint8_t *debug_line_base; // Start of .debug_line section
     const uint8_t *debug_abbrev_base; // Start of .debug_abbrev section
     size_t debug_abbrev_size;         // Total size of .debug_abbrev section
@@ -175,6 +205,12 @@ Abbrev* parse_cu_abbrevs(const uint8_t *abbrev_section_base, size_t abbrev_secti
             AttrSpec *as = calloc(1, sizeof(*as));
             if (!as) { perror("calloc AttrSpec"); free_abbrev_list(cu_local_abbrev_head); free(ab); return NULL; }
             as->name = name; as->form = form;
+            
+            // Handle DW_FORM_implicit_const which has a value in the abbrev
+            if (form == DW_FORM_implicit_const) {
+                as->implicit_const_value = read_sleb(&p);
+            }
+            
             *aps = as; aps = &as->next;
             if (p >= section_end && (name !=0 || form !=0)) { // Check after reading name/form
                  fprintf(stderr, "Warning: Ran out of data in .debug_abbrev while parsing attributes for abbrev code %lu.\n", ab->code);
@@ -200,7 +236,7 @@ static Abbrev *find_abbrev(Abbrev *cu_abbrev_list_head, uint64_t code) {
 
 /* Read attribute value by DW_FORM */
 // Returns raw value; interpretation (like string lookup) is separate
-static uint64_t read_form_val(const uint8_t **p, uint64_t form, uint8_t addr_size, const uint8_t* cu_start_ptr) {
+static uint64_t read_form_val(const uint8_t **p, uint64_t form, uint8_t addr_size, const uint8_t* cu_start_ptr, int64_t implicit_const_value) {
     switch (form) {
     case DW_FORM_addr:       *p += addr_size; return 0; // Value is the address itself, not handled here
     case DW_FORM_string:     { const char *s = (const char *)*p; *p += strlen(s) + 1; return (uint64_t)(uintptr_t)s; } // Inline string
@@ -224,6 +260,27 @@ static uint64_t read_form_val(const uint8_t **p, uint64_t form, uint8_t addr_siz
     case DW_FORM_sec_offset: { uint32_t off = le32toh(*(uint32_t *)(*p)); *p += 4; return off; } // Offset in another section
     case DW_FORM_flag:       return *(*p)++;
     case DW_FORM_flag_present: return 1; // Value is implicit
+    case DW_FORM_strx:         { uint64_t idx = read_uleb(p); return idx; } // String index - simplified for now
+    case DW_FORM_strx1:        { uint8_t idx = *(*p)++; return idx; } // 1-byte string index
+    case DW_FORM_strx2:        { uint16_t idx = le16toh(*(uint16_t *)(*p)); *p += 2; return idx; } // 2-byte string index
+    case DW_FORM_strx3:        { // 3-byte string index - read as little endian
+        uint32_t idx = ((*p)[0]) | ((*p)[1] << 8) | ((*p)[2] << 16);
+        *p += 3; return idx;
+    }
+    case DW_FORM_strx4:        { uint32_t idx = le32toh(*(uint32_t *)(*p)); *p += 4; return idx; } // 4-byte string index
+    case DW_FORM_line_strp:    { uint32_t off = le32toh(*(uint32_t *)(*p)); *p += 4; return off; } // Offset in .debug_line_str
+    case DW_FORM_addrx:        { uint64_t idx = read_uleb(p); return idx; } // Address index - simplified
+    case DW_FORM_addrx1:       { uint8_t idx = *(*p)++; return idx; } // 1-byte address index
+    case DW_FORM_addrx2:       { uint16_t idx = le16toh(*(uint16_t *)(*p)); *p += 2; return idx; } // 2-byte address index
+    case DW_FORM_addrx3:       { // 3-byte address index
+        uint32_t idx = ((*p)[0]) | ((*p)[1] << 8) | ((*p)[2] << 16);
+        *p += 3; return idx;
+    }
+    case DW_FORM_addrx4:       { uint32_t idx = le32toh(*(uint32_t *)(*p)); *p += 4; return idx; } // 4-byte address index
+    case DW_FORM_data16:       { *p += 16; return 0; } // 16-byte data block, skip for now
+    case DW_FORM_implicit_const: return (uint64_t)implicit_const_value; // Value is in abbreviation declaration
+    case DW_FORM_loclistx:     { uint64_t idx = read_uleb(p); return idx; } // Location list index
+    case DW_FORM_rnglistx:     { uint64_t idx = read_uleb(p); return idx; } // Range list index
     case DW_FORM_exprloc:    { uint64_t len = read_uleb(p); *p += len; return 0; } // Skip exprloc block
     case DW_FORM_block:      { uint64_t len = read_uleb(p); *p += len; return 0; }
     case DW_FORM_block1:     { uint8_t len = *(*p)++; *p += len; return 0; }
@@ -232,17 +289,27 @@ static uint64_t read_form_val(const uint8_t **p, uint64_t form, uint8_t addr_siz
     // DW_FORM_indirect is special, value is a ULEB specifying another form
     case DW_FORM_indirect: {
         uint64_t actual_form = read_uleb(p);
-        return read_form_val(p, actual_form, addr_size, cu_start_ptr);
+        return read_form_val(p, actual_form, addr_size, cu_start_ptr, implicit_const_value);
     }
+    case 0x0: // NULL form or error condition
+        return 0;
+    case 0x2: // Might be an alternative DW_FORM_block2 or vendor extension
+        { uint16_t len = le16toh(*(uint16_t *)(*p)); *p += 2; *p += len; return 0; }
     default:
         fprintf(stderr, "Warning: Unsupported DW_FORM 0x%lx\n", form);
         return 0;
     }
 }
 
-static const char *get_str_val(uint64_t val, uint64_t form, const uint8_t *str_base) {
+static const char *get_str_val(uint64_t val, uint64_t form, const uint8_t *str_base, const uint8_t *line_str_base) {
     if (form == DW_FORM_string) return (const char *)(uintptr_t)val;
     if (form == DW_FORM_strp) return (const char *)(str_base + val);
+    if (form == DW_FORM_line_strp) return line_str_base ? (const char *)(line_str_base + val) : "<?no_line_str?>";
+    // DWARF 5 string index forms - simplified handling (should lookup in string offsets table)
+    if (form == DW_FORM_strx || form == DW_FORM_strx1 || form == DW_FORM_strx2 || 
+        form == DW_FORM_strx3 || form == DW_FORM_strx4) {
+        return "<?strx_not_impl?>"; // String index forms need proper implementation
+    }
     return "";
 }
 
@@ -274,15 +341,22 @@ void parse_line_program_header(CUContext *ctx, uint64_t line_offset_in_debug_lin
     uint32_t total_length = le32toh(*(uint32_t*)p); p += 4;
     const uint8_t *header_end = line_prog_start + 4 + total_length; // End of this CU's line program
     uint16_t version = le16toh(*(uint16_t*)p); p += 2;
-    if (version < 2 || version > 4) { // We support DWARF 2-4 line headers
+    if (version < 2 || version > 5) { // Support DWARF 2-5 line headers
         fprintf(stderr, "Warning: Unsupported .debug_line version %u for CU %d\n", version, ctx->cu_idx);
         return;
     }
     uint32_t header_length = le32toh(*(uint32_t*)p); p += 4;
     const uint8_t *prologue_end = p + header_length;
+    
+    // DWARF 5 has additional header fields
+    if (version >= 5) {
+        uint8_t address_size = *p++; // Address size  
+        uint8_t segment_selector_size = *p++; // Segment selector size
+    }
+    
     /*uint8_t min_instruction_length = *p++; p++; // Skip default_is_stmt, line_base, line_range, opcode_base
     p++; p++; p++;*/
-    // Skip min_instruction_length, maximum_ops_per_instruction (DWARF 4),
+    // Skip min_instruction_length, maximum_ops_per_instruction (DWARF 4+),
     // default_is_stmt, line_base, line_range, opcode_base
     p++; // min_instruction_length
     if (version >= 4) p++; // maximum_ops_per_instruction
@@ -294,53 +368,176 @@ void parse_line_program_header(CUContext *ctx, uint64_t line_offset_in_debug_lin
     p += opcode_base -1;
 
 
-    // Include Directories
-    // Count first
-    const uint8_t *temp_p = p;
-    while (*temp_p) {
-        ctx->num_include_directories++;
-        temp_p += strlen((const char*)temp_p) + 1;
-    }
-    temp_p++; // Skip final null terminator for directory list
-
-    if (ctx->num_include_directories > 0) {
-        ctx->include_directories = calloc(ctx->num_include_directories, sizeof(char*));
-        if (!ctx->include_directories) { perror("calloc include_directories"); ctx->num_include_directories = 0; return; }
-        for (uint64_t i = 0; i < ctx->num_include_directories; ++i) {
-            ctx->include_directories[i] = strdup((const char*)p);
-            if (!ctx->include_directories[i]) { perror("strdup include_dir"); /* partial cleanup? */ return; }
-            p += strlen((const char*)p) + 1;
+    // Directory and File parsing differs between DWARF 2-4 and DWARF 5
+    if (version >= 5) {
+        // DWARF 5 format with directory_entry_format and file_name_entry_format
+        
+        // Directory entry format
+        uint8_t directory_entry_format_count = *p++;
+        
+        // Store directory format descriptors
+        struct { uint64_t content_type; uint64_t form; } dir_formats[8]; // Max reasonable formats
+        for (uint8_t i = 0; i < directory_entry_format_count && i < 8; i++) {
+            dir_formats[i].content_type = read_uleb(&p);
+            dir_formats[i].form = read_uleb(&p);
         }
-    }
-    p++; // Skip final null terminator for directory list
-
-    // File Names
-    // Count first
-    temp_p = p;
-    uint64_t file_count = 0;
-    while(*temp_p) {
-        file_count++;
-        temp_p += strlen((const char*)temp_p) + 1; // file name
-        read_uleb(&temp_p); // dir_index
-        read_uleb(&temp_p); // time
-        read_uleb(&temp_p); // length
-    }
-    //temp_p++; // Skip final null for file list
-
-    ctx->num_file_entries = file_count;
-    if (ctx->num_file_entries > 0) {
-        ctx->file_entries = calloc(ctx->num_file_entries, sizeof(FileEntry));
-        if (!ctx->file_entries) { perror("calloc file_entries"); ctx->num_file_entries = 0; return; }
-        for (uint64_t i = 0; i < ctx->num_file_entries; ++i) {
-            ctx->file_entries[i].name = strdup((const char*)p);
-            if (!ctx->file_entries[i].name) { perror("strdup file_name"); return; }
-            p += strlen((const char*)p) + 1;
-            ctx->file_entries[i].dir_index = read_uleb(&p);
-            read_uleb(&p); // Skip time
-            read_uleb(&p); // Skip length
+        
+        // Directories count
+        ctx->num_include_directories = read_uleb(&p);
+        if (ctx->num_include_directories > 0) {
+            ctx->include_directories = calloc(ctx->num_include_directories, sizeof(char*));
+            if (!ctx->include_directories) { 
+                perror("calloc include_directories"); 
+                ctx->num_include_directories = 0; 
+                return; 
+            }
+            
+            // Read each directory entry
+            for (uint64_t i = 0; i < ctx->num_include_directories; i++) {
+                for (uint8_t j = 0; j < directory_entry_format_count && j < 8; j++) {
+                    if (dir_formats[j].content_type == DW_LNCT_path) {
+                        // This is the directory path
+                        if (dir_formats[j].form == DW_FORM_string) {
+                            ctx->include_directories[i] = strdup((const char*)p);
+                            p += strlen((const char*)p) + 1;
+                        } else if (dir_formats[j].form == DW_FORM_line_strp) {
+                            uint32_t offset = le32toh(*(uint32_t*)p);
+                            p += 4;
+                            if (ctx->debug_line_str_base) {
+                                ctx->include_directories[i] = strdup((const char*)(ctx->debug_line_str_base + offset));
+                            } else {
+                                ctx->include_directories[i] = strdup("<?no_line_str?>");
+                            }
+                        } else {
+                            // Unknown form, skip
+                            read_form_val(&p, dir_formats[j].form, ctx->cu_address_size, ctx->cu_compilation_unit_base, 0);
+                            ctx->include_directories[i] = strdup("<?unknown_dir_form?>");
+                        }
+                        if (!ctx->include_directories[i]) {
+                            perror("strdup include_dir");
+                            return;
+                        }
+                    } else {
+                        // Skip other content types
+                        read_form_val(&p, dir_formats[j].form, ctx->cu_address_size, ctx->cu_compilation_unit_base, 0);
+                    }
+                }
+                if (!ctx->include_directories[i]) {
+                    ctx->include_directories[i] = strdup(""); // Default empty if no path found
+                }
+            }
         }
+        
+        // File name entry format
+        uint8_t file_name_entry_format_count = *p++;
+        
+        // Store file format descriptors  
+        struct { uint64_t content_type; uint64_t form; } file_formats[8]; // Max reasonable formats
+        for (uint8_t i = 0; i < file_name_entry_format_count && i < 8; i++) {
+            file_formats[i].content_type = read_uleb(&p);
+            file_formats[i].form = read_uleb(&p);
+        }
+        
+        // File names count
+        ctx->num_file_entries = read_uleb(&p);
+        if (ctx->num_file_entries > 0) {
+            ctx->file_entries = calloc(ctx->num_file_entries, sizeof(FileEntry));
+            if (!ctx->file_entries) { 
+                perror("calloc file_entries"); 
+                ctx->num_file_entries = 0; 
+                return; 
+            }
+            
+            // Read each file entry
+            for (uint64_t i = 0; i < ctx->num_file_entries; i++) {
+                ctx->file_entries[i].dir_index = 0; // Default
+                for (uint8_t j = 0; j < file_name_entry_format_count && j < 8; j++) {
+                    if (file_formats[j].content_type == DW_LNCT_path) {
+                        // This is the file name
+                        if (file_formats[j].form == DW_FORM_string) {
+                            ctx->file_entries[i].name = strdup((const char*)p);
+                            p += strlen((const char*)p) + 1;
+                        } else if (file_formats[j].form == DW_FORM_line_strp) {
+                            uint32_t offset = le32toh(*(uint32_t*)p);
+                            p += 4;
+                            if (ctx->debug_line_str_base) {
+                                ctx->file_entries[i].name = strdup((const char*)(ctx->debug_line_str_base + offset));
+                            } else {
+                                ctx->file_entries[i].name = strdup("<?no_line_str?>");
+                            }
+                        } else {
+                            // Unknown form, skip
+                            read_form_val(&p, file_formats[j].form, ctx->cu_address_size, ctx->cu_compilation_unit_base, 0);
+                            ctx->file_entries[i].name = strdup("<?unknown_file_form?>");
+                        }
+                        if (!ctx->file_entries[i].name) {
+                            perror("strdup file_name");
+                            return;
+                        }
+                    } else if (file_formats[j].content_type == DW_LNCT_directory_index) {
+                        // This is the directory index
+                        ctx->file_entries[i].dir_index = read_form_val(&p, file_formats[j].form, ctx->cu_address_size, ctx->cu_compilation_unit_base, 0);
+                    } else {
+                        // Skip other content types (timestamp, size, etc.)
+                        read_form_val(&p, file_formats[j].form, ctx->cu_address_size, ctx->cu_compilation_unit_base, 0);
+                    }
+                }
+                if (!ctx->file_entries[i].name) {
+                    ctx->file_entries[i].name = strdup("<?no_filename?>"); // Default if no path found
+                }
+            }
+        }
+        
+    } else {
+        // DWARF 2-4 format (original implementation)
+        
+        // Include Directories
+        // Count first
+        const uint8_t *temp_p = p;
+        while (*temp_p) {
+            ctx->num_include_directories++;
+            temp_p += strlen((const char*)temp_p) + 1;
+        }
+        temp_p++; // Skip final null terminator for directory list
+
+        if (ctx->num_include_directories > 0) {
+            ctx->include_directories = calloc(ctx->num_include_directories, sizeof(char*));
+            if (!ctx->include_directories) { perror("calloc include_directories"); ctx->num_include_directories = 0; return; }
+            for (uint64_t i = 0; i < ctx->num_include_directories; ++i) {
+                ctx->include_directories[i] = strdup((const char*)p);
+                if (!ctx->include_directories[i]) { perror("strdup include_dir"); /* partial cleanup? */ return; }
+                p += strlen((const char*)p) + 1;
+            }
+        }
+        p++; // Skip final null terminator for directory list
+
+        // File Names
+        // Count first
+        temp_p = p;
+        uint64_t file_count = 0;
+        while(*temp_p) {
+            file_count++;
+            temp_p += strlen((const char*)temp_p) + 1; // file name
+            read_uleb(&temp_p); // dir_index
+            read_uleb(&temp_p); // time
+            read_uleb(&temp_p); // length
+        }
+
+        ctx->num_file_entries = file_count;
+        if (ctx->num_file_entries > 0) {
+            ctx->file_entries = calloc(ctx->num_file_entries, sizeof(FileEntry));
+            if (!ctx->file_entries) { perror("calloc file_entries"); ctx->num_file_entries = 0; return; }
+            for (uint64_t i = 0; i < ctx->num_file_entries; ++i) {
+                ctx->file_entries[i].name = strdup((const char*)p);
+                if (!ctx->file_entries[i].name) { perror("strdup file_name"); return; }
+                p += strlen((const char*)p) + 1;
+                ctx->file_entries[i].dir_index = read_uleb(&p);
+                read_uleb(&p); // Skip time
+                read_uleb(&p); // Skip length
+            }
+        }
+        p++; // Skip final null for file list
     }
-    p++; // Skip final null for file list
     // Remainder is the line number program instructions, which we don't parse for this assignment.
 }
 
@@ -370,10 +567,10 @@ char* resolve_type_to_string_recursive(CUContext *ctx, uint64_t type_die_cu_offs
 
     const uint8_t *type_attr_scan_ptr = p_type_die; // p_type_die is already advanced past abbrev code
     for (AttrSpec *as = ab->attrs; as; as = as->next) {
-        uint64_t val = read_form_val(&type_attr_scan_ptr, as->form, ctx->cu_address_size, ctx->cu_compilation_unit_base);
+        uint64_t val = read_form_val(&type_attr_scan_ptr, as->form, ctx->cu_address_size, ctx->cu_compilation_unit_base, as->implicit_const_value);
         switch (as->name) {
             case DW_AT_type: base_type_offset = val; break;
-            case DW_AT_name: type_name_attr = get_str_val(val, as->form, ctx->debug_str_base); break;
+            case DW_AT_name: type_name_attr = get_str_val(val, as->form, ctx->debug_str_base, ctx->debug_line_str_base); break;
             case DW_AT_byte_size: byte_size_attr = val; break;
             case DW_AT_encoding: encoding_attr = val; break;
         }
@@ -483,7 +680,7 @@ char* resolve_type_to_string_recursive(CUContext *ctx, uint64_t type_die_cu_offs
                     uint64_t param_type_offset_attr = 0;
                     const uint8_t *param_attr_ptr = children_ptr; // Pointer to attributes of child
                     for (AttrSpec *pas = param_ab->attrs; pas; pas = pas->next) {
-                        uint64_t pval = read_form_val(&param_attr_ptr, pas->form, ctx->cu_address_size, ctx->cu_compilation_unit_base);
+                        uint64_t pval = read_form_val(&param_attr_ptr, pas->form, ctx->cu_address_size, ctx->cu_compilation_unit_base, pas->implicit_const_value);
                         if (pas->name == DW_AT_type) param_type_offset_attr = pval;
                     }
                     children_ptr = param_attr_ptr; // Advance past param attributes
@@ -511,7 +708,7 @@ char* resolve_type_to_string_recursive(CUContext *ctx, uint64_t type_die_cu_offs
                             Abbrev *temp_ab = find_abbrev(ctx->cu_abbrev_list_head, temp_code);
                             if (!temp_ab) { temp_child_ptr++; continue; } // Basic skip
                             for(AttrSpec* temp_as = temp_ab->attrs; temp_as; temp_as = temp_as->next) {
-                                read_form_val(&temp_child_ptr, temp_as->form, ctx->cu_address_size, ctx->cu_compilation_unit_base);
+                                read_form_val(&temp_child_ptr, temp_as->form, ctx->cu_address_size, ctx->cu_compilation_unit_base, temp_as->implicit_const_value);
                             }
                             if (temp_ab->has_children) { // If param's child has children, skip them too
                                 while(*temp_child_ptr != 0) temp_child_ptr++; // Skip until null DIE
@@ -588,11 +785,11 @@ void parse_die(CUContext *ctx, const uint8_t **p_die_ptr, const uint8_t *unit_en
     // Store attribute values
    const uint8_t *attr_scan_ptr = *p_die_ptr; 
     for (AttrSpec *as = ab->attrs; as; as = as->next) {
-        uint64_t val = read_form_val(&attr_scan_ptr, as->form, ctx->cu_address_size, ctx->cu_compilation_unit_base);
+        uint64_t val = read_form_val(&attr_scan_ptr, as->form, ctx->cu_address_size, ctx->cu_compilation_unit_base, as->implicit_const_value);
         switch (as->name) {
-            case DW_AT_name: name     = get_str_val(val, as->form, ctx->debug_str_base); break;
-            case DW_AT_comp_dir: comp_dir = get_str_val(val, as->form, ctx->debug_str_base); break;
-            case DW_AT_producer: producer = get_str_val(val, as->form, ctx->debug_str_base); break;
+            case DW_AT_name: name     = get_str_val(val, as->form, ctx->debug_str_base, ctx->debug_line_str_base); break;
+            case DW_AT_comp_dir: comp_dir = get_str_val(val, as->form, ctx->debug_str_base, ctx->debug_line_str_base); break;
+            case DW_AT_producer: producer = get_str_val(val, as->form, ctx->debug_str_base, ctx->debug_line_str_base); break;
             case DW_AT_low_pc: low_pc   = val; break; 
             case DW_AT_high_pc: high_pc  = val; break; 
             case DW_AT_decl_file: decl_file_idx = val; break; 
@@ -669,9 +866,9 @@ void parse_die(CUContext *ctx, const uint8_t **p_die_ptr, const uint8_t *unit_en
 
                 const uint8_t *param_attr_ptr = children_ptr;
                 for (AttrSpec *pas = param_ab->attrs; pas; pas = pas->next) {
-                    uint64_t pval = read_form_val(&param_attr_ptr, pas->form, ctx->cu_address_size, ctx->cu_compilation_unit_base);
+                    uint64_t pval = read_form_val(&param_attr_ptr, pas->form, ctx->cu_address_size, ctx->cu_compilation_unit_base, pas->implicit_const_value);
                     if (pas->name == DW_AT_type) param_type_offset = pval;
-                    if (pas->name == DW_AT_name) param_name_attr = get_str_val(pval, pas->form, ctx->debug_str_base);
+                    if (pas->name == DW_AT_name) param_name_attr = get_str_val(pval, pas->form, ctx->debug_str_base, ctx->debug_line_str_base);
                 }
                 children_ptr = param_attr_ptr; // Advance past param attributes
 
@@ -692,7 +889,7 @@ void parse_die(CUContext *ctx, const uint8_t **p_die_ptr, const uint8_t *unit_en
                         Abbrev *gc_ab = find_abbrev(ctx->cu_abbrev_list_head, gc_code);
                         if (!gc_ab) { grand_children_ptr++; continue;} // Basic skip
                         for(AttrSpec* gc_as = gc_ab->attrs; gc_as; gc_as = gc_as->next) {
-                            read_form_val(&grand_children_ptr, gc_as->form, ctx->cu_address_size, ctx->cu_compilation_unit_base);
+                            read_form_val(&grand_children_ptr, gc_as->form, ctx->cu_address_size, ctx->cu_compilation_unit_base, gc_as->implicit_const_value);
                         }
                         if (gc_ab->has_children) { // If param's child itself has children
                              while(grand_children_ptr < unit_end_ptr && *grand_children_ptr != 0) { // Skip until null DIE for gc's children
@@ -702,7 +899,7 @@ void parse_die(CUContext *ctx, const uint8_t **p_die_ptr, const uint8_t *unit_en
                                  Abbrev *ggc_ab = find_abbrev(ctx->cu_abbrev_list_head, ggc_code);
                                  if(!ggc_ab) {grand_children_ptr++; continue;}
                                  for(AttrSpec* ggc_as = ggc_ab->attrs; ggc_as; ggc_as = ggc_as->next) {
-                                     read_form_val(&grand_children_ptr, ggc_as->form, ctx->cu_address_size, ctx->cu_compilation_unit_base);
+                                     read_form_val(&grand_children_ptr, ggc_as->form, ctx->cu_address_size, ctx->cu_compilation_unit_base, ggc_as->implicit_const_value);
                                  }
                                  if(ggc_ab->has_children && grand_children_ptr < unit_end_ptr && *grand_children_ptr !=0) grand_children_ptr++; // Skip children's null terminator
                              }
@@ -812,8 +1009,8 @@ int main(int argc, char **argv) {
         elf_end(e); close(fd); return EXIT_FAILURE;
     }
 
-    const uint8_t *debug_info_data=NULL, *debug_abbrev_data=NULL, *debug_str_data=NULL, *debug_line_data=NULL;
-    size_t info_sz=0, abbrev_sz=0, str_sz=0, line_sz=0;
+    const uint8_t *debug_info_data=NULL, *debug_abbrev_data=NULL, *debug_str_data=NULL, *debug_line_data=NULL, *debug_line_str_data=NULL;
+    size_t info_sz=0, abbrev_sz=0, str_sz=0, line_sz=0, line_str_sz=0;
 
     Elf_Scn *scn = NULL;
     while ((scn = elf_nextscn(e, scn)) != NULL) {
@@ -832,6 +1029,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(name, ".debug_abbrev")) { debug_abbrev_data = d->d_buf; abbrev_sz = d->d_size; }
         else if (!strcmp(name, ".debug_str"))    { debug_str_data = d->d_buf; str_sz    = d->d_size; }
         else if (!strcmp(name, ".debug_line"))   { debug_line_data = d->d_buf; line_sz   = d->d_size; }
+        else if (!strcmp(name, ".debug_line_str")) { debug_line_str_data = d->d_buf; line_str_sz = d->d_size; }
     }
 
     if (!debug_info_data || !debug_abbrev_data || !debug_str_data) {
@@ -851,6 +1049,7 @@ int main(int argc, char **argv) {
         
         ctx.debug_info_base = debug_info_data;
         ctx.debug_str_base = debug_str_data;
+        ctx.debug_line_str_base = debug_line_str_data;
         ctx.debug_line_base = debug_line_data;
         ctx.debug_abbrev_base = debug_abbrev_data;
         ctx.debug_abbrev_size = abbrev_sz;
@@ -869,8 +1068,18 @@ int main(int argc, char **argv) {
         }
 
         ctx.cu_version = le16toh(*(uint16_t*)p_cu_iterator); p_cu_iterator += 2;
-        ctx.cu_abbrev_offset = le32toh(*(uint32_t*)p_cu_iterator); p_cu_iterator += 4;
-        ctx.cu_address_size = *p_cu_iterator++;
+        
+        // DWARF 5 has a different header format than DWARF 2-4
+        if (ctx.cu_version >= 5) {
+            // DWARF 5 format: unit_type (1 byte), address_size (1 byte), abbrev_offset (4 bytes)
+            uint8_t unit_type = *p_cu_iterator++; // Usually DW_UT_compile (1)
+            ctx.cu_address_size = *p_cu_iterator++;
+            ctx.cu_abbrev_offset = le32toh(*(uint32_t*)p_cu_iterator); p_cu_iterator += 4;
+        } else {
+            // DWARF 2-4 format: abbrev_offset (4 bytes), address_size (1 byte)
+            ctx.cu_abbrev_offset = le32toh(*(uint32_t*)p_cu_iterator); p_cu_iterator += 4;
+            ctx.cu_address_size = *p_cu_iterator++;
+        }
         ctx.cu_die_start = p_cu_iterator; // p_cu_iterator now points to the first DIE's abbrev code
         // --- End CU Header Parsing ---
 
